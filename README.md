@@ -4,4 +4,4 @@ Please find the following files:
   - mqtt_broker.py: the script that connects to the mqtt broker and collects data
   - data_processing.py: the script that deserializes a data point into a nested Python dictionary
   - mqtt_broker_tests.py: unit tests for both files
-  - Conceptual Questions: Answers to conceptual questions 1(a) and 2. 
+  - Conceptual Questions.pdf: Answers to conceptual questions 1(a) and 2. 
