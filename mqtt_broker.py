@@ -27,15 +27,16 @@ def collect_data(sys_id, username, password, sqs_queue_url):
 
     client = mqtt.Client()
 
-    client.on_connect = on_connect #lambda c,d,f,r: c.subscribe('N/#', 0)
+    client.on_connect = on_connect 
     client.on_message = on_message
 
 
     #set username and password
     client.username_pw_set(username, password)
 
+    print('Trying to connect...')
     #connect to broker
-    client.connect(get_vrm_broker_url(sys_id), port=8883)#client.connect('mqtt://test.mosquitto.org')
+    client.connect(get_vrm_broker_url(sys_id), 8883)
 
     run = True
     #continue to run until program is exited
@@ -76,8 +77,8 @@ def get_broker_credentials():
 
 
 if __name__ == '__main__':
-
     system_id, username, password, sqs_url = get_broker_credentials()
+    print('starting...')
 
     #collect data
     collect_data(system_id, username, password, sqs_url)
