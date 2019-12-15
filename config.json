@@ -1,6 +1,0 @@
-{
-  "username": "monitoring-test@ammp.io",
-  "password": "3Ybu3tAdfF7kWSBwEwzB5Rhb",
-  "system_id": "78a504c59655",
-  "dummy_data": [ "N/78a504c59655/system/0/Serial {'value': '78a504c59655'}", "N/78a504c59655/system/0/Ac/ActiveIn/Source {'value': 2}", "N/78a504c59655/system/0/Ac/Consumption/L2/Power {'value': null}", "N/78a504c59655/system/0/Ac/Consumption/L3/Power {'value': null}", "N/78a504c59655/system/0/Ac/Consumption/NumberOfPhases {'value': 1}", "N/78a504c59655/system/0/Ac/Consumption/L1/Power {'value': 784}", "N/78a504c59655/system/0/Ac/ConsumptionOnInput/L1/Power {'value': 0}", "N/78a504c59655/system/0/Ac/ConsumptionOnInput/L2/Power {'value': null}", "N/78a504c59655/system/0/Ac/ConsumptionOnInput/L3/Power {'value': null}", "N/78a504c59655/system/0/Ac/ConsumptionOnInput/NumberOfPhases {'value': 1}" ]
-}
