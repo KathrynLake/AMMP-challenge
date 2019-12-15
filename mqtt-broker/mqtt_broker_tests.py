@@ -21,7 +21,7 @@ class Test_mqtt_broker_tests(unittest.TestCase):
         client = mqtt.Client()
 
         notifications = []
-        client.on_connect = lambda c,d,f,r: c.subscribe('N//{}/system'.format(system_id), 0)
+        client.on_connect = lambda c,d,f,r: c.subscribe('N/{}/system'.format(system_id), 0)
 
         #set username and password
         client.username_pw_set(username, password)
@@ -39,7 +39,7 @@ class Test_mqtt_broker_tests(unittest.TestCase):
         client = mqtt.Client()
 
         notifications = []
-        client.on_connect = lambda c,d,f,r: c.subscribe('N//{}/system'.format(system_id), 0)
+        client.on_connect = lambda c,d,f,r: c.subscribe('N/{}/system'.format(system_id), 0)
 
         #set username and password and connect
         client.username_pw_set(username, password)

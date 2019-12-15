@@ -1,6 +1,6 @@
 import paho.mqtt.client as mqtt
 import time
-from sqs_pipeline import DataQueue
+# sqs_pipeline import DataQueue
 from data_processing import *
 from load_config import *
 
@@ -18,16 +18,18 @@ def collect_data(sys_id, username, password):
 
     #On connect and on message callbacks
     def on_connect(client,d,f,r):
-        print('Connected with result code:'+str(r))
+        print('Connected')
         # subscribe for all devices of user
-        client.subscribe('N/{}'.format(sys_id), 0)
+        client.subscribe('N/{}/system'.format(sys_id), 0)
 
-    # gives message from device
     def on_message(client,userdata,msg):
-        #print('Topic',msg.topic + '\nMessage:' + str(msg.payload))
-        handle_message(userdata, msg)
+        try:
+            handle_message(userdata, str(msg.topic) + ' ' + str(msg.payload))
+        except:
+            handle_message(userdata, str(msg))
 
-    client = mqtt.Client()
+
+    client = mqtt.Client("", True, None, mqtt.MQTTv311)
 
     client.on_connect = on_connect 
     client.on_message = on_message
@@ -38,12 +40,10 @@ def collect_data(sys_id, username, password):
 
     print('Trying to connect...')
     #connect to broker
-    client.connect('mqtt.victronenergy.com', 8883)#get_vrm_broker_url(sys_id), 8883)
+    client.connect('mqtt.victronenergy.com', 8883)
+    client.subscribe("N/*", qos=2)
+    client.loop_forever()
 
-    run = True
-    #continue to run until program is exited
-    while run:
-        client.loop()
 
 
 def handle_message(userdata, message):
@@ -65,7 +65,7 @@ def handle_message(userdata, message):
 def push_data_to_pipeline(message):
     '''Connect to an AWS SQS pipeline and send it the provided data. '''
 
-    #dq = DataQueue('raw')
+    dq = DataQueue('raw')
     try:
         dq.put(datapoints, company_id)
     except:
