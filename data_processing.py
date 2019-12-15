@@ -1,33 +1,42 @@
 import json
+from datetime import datetime
 
 
-def deserialize_message_data(message):
+def deserialize_message_data(dp):
     """take in a list of data points, and insert them into a python nested dict"""
     message_dict = {}
 
-    for dp in message:
-        #get "keys" into a list: 
-        message_dict_loc = dp.split(' ')[0]
-        message_dict_loc = message_dict_loc.split('/')
+    #for dp in message:
+    #get "keys" into a list: 
+    message_dict_loc = dp.split(' ')[0]
+    message_dict_loc = message_dict_loc.split('/')
 
-        #Get the value out by converting the value part into json: 
-        valuedict = dp[dp.index(' ') + 1:]
-        valuedict = valuedict.replace('\'', '\"')
+    #can_deserialize: helps to filter out bad messages
+    can_deserialize = True
 
-        can_deserialize = True
+    #Drop the messages which are just the system ID (eg. N/sys_id/system/0/Serial {"value": "sys_id"})
+    if message_dict_loc[-1] == 'Serial': 
+        can_deserialize = False
 
-        try:
-            valuedict = json.loads(valuedict)
-            value = valuedict['value']
-        except:
-            print('The following data point could not be serialized due to incorrect format: \n{}'.format(dp))
-            can_deserialize = False
+    #Get the value out by converting the value part into json: 
+    valuedict = dp[dp.index(' ') + 1:]
+    valuedict = valuedict.replace('\'', '\"')
 
-        if can_deserialize:
-            #fill dict with values with recursive function
-            message_dict = insert_key_or_value(message_dict, message_dict_loc, 0, value)
+    try:
+        valuedict = json.loads(valuedict)
+        value = valuedict['value']
+    except:
+        print('The following data point could not be serialized due to incorrect format: \n{}'.format(dp))
+        can_deserialize = False
 
-    return message_dict
+    if can_deserialize:
+        #fill dict with values with recursive function
+        message_dict = insert_key_or_value(message_dict, message_dict_loc, 0, value)
+
+        return message_dict
+
+    else:
+        return None
 
 
 def insert_key_or_value(dict, loc, ind, value):
@@ -67,6 +76,22 @@ def nested_set(dict, keys, value):
     for key in keys[:-1]:
         dict = dict.setdefault(key, {})
     dict[keys[-1]] = value
+
+
+def add_metadata(deserialized_message):
+    #Add metadata:
+    final_datapoint = {'meta': {}, 'datapoint': {}}
+
+    timestamp = datetime.now()
+    timestamp = str(timestamp.isoformat('T'))
+    final_datapoint['meta']['time'] = timestamp
+
+    final_datapoint['meta']['asset_id'] = None
+    final_datapoint['meta']['datamap_id'] = None
+
+    final_datapoint['datapoint'] = deserialized_message
+
+    return final_datapoint
 
 
 data = ['N/78a504c59655/system/0/Dc/Battery/Current {"value": -46.099998474121094}', 'N/78a504c59655/system/0/Dc/Battery/Soc {"value": 64.699996948242188}', \

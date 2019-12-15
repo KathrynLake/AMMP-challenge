@@ -1,6 +1,8 @@
 import paho.mqtt.client as mqtt
 import time
-#from sqs_pipeline import DataQueue
+from sqs_pipeline import DataQueue
+from data_processing import *
+from load_config import *
 
 def get_vrm_broker_url(system_id):
     ''' Get the url for the MQQT broker from the system ID. '''
@@ -11,19 +13,19 @@ def get_vrm_broker_url(system_id):
     return 'mqtt{}.victronenergy.com'.format(broker_index)
 
 
-def collect_data(sys_id, username, password, sqs_queue_url):
+def collect_data(sys_id, username, password):
     '''Connect to the MQTT broker, and listen for messages. Will run until program is exited. '''
 
     #On connect and on message callbacks
     def on_connect(client,d,f,r):
         print('Connected with result code:'+str(r))
         # subscribe for all devices of user
-        client.subscribe('N/{}/system'.format(sys_id), 0)
+        client.subscribe('N/{}'.format(sys_id), 0)
 
     # gives message from device
     def on_message(client,userdata,msg):
-        print('Topic',msg.topic + '\nMessage:' + str(msg.payload))
-        #handle_message(userdata, msg, sqs_queue_url)
+        #print('Topic',msg.topic + '\nMessage:' + str(msg.payload))
+        handle_message(userdata, msg)
 
     client = mqtt.Client()
 
@@ -36,7 +38,7 @@ def collect_data(sys_id, username, password, sqs_queue_url):
 
     print('Trying to connect...')
     #connect to broker
-    client.connect(get_vrm_broker_url(sys_id), 8883)
+    client.connect('mqtt.victronenergy.com', 8883)#get_vrm_broker_url(sys_id), 8883)
 
     run = True
     #continue to run until program is exited
@@ -44,41 +46,42 @@ def collect_data(sys_id, username, password, sqs_queue_url):
         client.loop()
 
 
-def handle_message(message, sqs_queue_url):
+def handle_message(userdata, message):
     '''Accepts a data point sent by the MQTT broker. Formats the data and pushes it to the SQS queue. '''
 
     #do what needs to be done to make the data into a dict
-    message = format_message_data(message)
+    deserialized_message = deserialize_message_data(message)
 
-    #push data to pipeline
-    msg = push_data_to_pipeline(message, sqs_queue_url)
+    #the message will be None if it was founf to be in a bad format, or irrelevant. 
+    if message is not None:
+        #add metadata
+        final_datapoint = add_metadata(deserialized_message)
+
+        #push data to pipeline
+        push_data_to_pipeline(final_datapoint)
 
 
-def format_message_data(message):
-    """Take raw data from broker, and transform it into a useable data point to be pushed to the pipeline"""
-    return message
 
-def push_data_to_pipeline(userdata, message, sqs_queue_url):
+def push_data_to_pipeline(message):
     '''Connect to an AWS SQS pipeline and send it the provided data. '''
-    dq = DataQueue('raw')
+
+    #dq = DataQueue('raw')
     try:
         dq.put(datapoints, company_id)
     except:
-        print('Cannot push data to queue service. The message is: /n/n {} /n/n/n'.format(message))
+        print('datapoint: \n {} \n\n'.format(message))
 
 def get_broker_credentials():
     #set credentials
     system_id = '78a504c59655'
     username = 'monitoring-test@ammp.io'
     password = '3Ybu3tAdfF7kWSBwEwzB5Rhb'
-    sqs_url = 'no_sqs_url'
 
-    return system_id, username, password, sqs_url
+    return system_id, username, password
 
 
 if __name__ == '__main__':
-    system_id, username, password, sqs_url = get_broker_credentials()
-    print('starting...')
+    config = load_config()
 
     #collect data
-    collect_data(system_id, username, password, sqs_url)
+    collect_data(config['system_id'], config['username'], config['password'])
