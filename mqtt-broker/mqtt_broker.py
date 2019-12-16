@@ -20,7 +20,7 @@ def collect_data(sys_id, username, password):
     def on_connect(client,d,f,r):
         print('Connected')
         # subscribe for all devices of user
-        client.subscribe('N/{}/system'.format(sys_id), 0)
+        client.subscribe('N/{}/#'.format(sys_id), 0)
 
     def on_message(client,userdata,msg):
         try:
@@ -29,7 +29,7 @@ def collect_data(sys_id, username, password):
             handle_message(userdata, str(msg))
 
 
-    client = mqtt.Client("", True, None, mqtt.MQTTv311)
+    client = mqtt.Client("", True, None, protocol=mqtt.MQTTv311)
 
     client.on_connect = on_connect 
     client.on_message = on_message
@@ -41,7 +41,7 @@ def collect_data(sys_id, username, password):
     print('Trying to connect...')
     #connect to broker
     client.connect('mqtt.victronenergy.com', 8883)
-    client.subscribe("N/*", qos=2)
+
     client.loop_forever()
 
 

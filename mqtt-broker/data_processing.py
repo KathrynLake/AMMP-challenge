@@ -93,13 +93,3 @@ def add_metadata(deserialized_message):
 
     return final_datapoint
 
-
-data = ['N/78a504c59655/system/0/Dc/Battery/Current {"value": -46.099998474121094}', 'N/78a504c59655/system/0/Dc/Battery/Soc {"value": 64.699996948242188}', \
-    'N/78a504c59655/system/0/Dc/Battery/State {"value": 2}', 'N/78a504c59655/system/0/Dc/Battery/Temperature {"value": 29.0}', 'N/78a504c59655/system/0/Dc/Battery/Current xyz', \
-    'N/78a504c59655/system/0/Dc/Battery/TemperatureService {"value": "com.victronenergy.battery.ttyO2"}', 'N/78a504c59655/system/0/Dc/Battery/TimeToGo {"value": 8340.0}',\
-   'N/78a504c59655/system/0/Dc/Battery/Voltage {"value": 48.150001525878906}']
-
-
-if __name__ == '__main__':
-    ds_message = deserialize_message_data(data)
-    print(str(ds_message))
